@@ -3,6 +3,7 @@ package com.y271727uy.farmerstales
 import com.mojang.logging.LogUtils
 import com.y271727uy.farmerstales.all.ModBlocks
 import com.y271727uy.farmerstales.all.ModItems
+import com.y271727uy.farmerstales.compat.CompatManager
 import com.y271727uy.farmerstales.config.Config
 import com.y271727uy.farmerstales.data.ModDataGen
 import net.minecraftforge.common.MinecraftForge
@@ -27,6 +28,7 @@ class FTMod {
     }
 
     private fun commonSetup(event: FMLCommonSetupEvent) {
+        CompatManager.init()
         LOGGER.info("Farmer's Tales common setup complete")
     }
 

@@ -123,6 +123,11 @@ dependencies {
     jarJar(modApi(libs.registrate.get())!!)
     modImplementation("thedarkcolour:kotlinforforge:4.12.0")
 
+    // Optional API jars are compile-time only; the actual mods are supplied by localModRuntime.
+    add("compileOnly", files("lib/Jade-1.20.1-Forge-11.13.3.jar"))
+    add("compileOnly", files("lib/jei-1.20.1-forge-15.20.0.129.jar"))
+    add("compileOnly", files("lib/SereneSeasons-forge-1.20.1-9.1.0.3.jar"))
+
     // Local development/runtime mods. Comment out an entry to disable it.
     // These files are used by run configurations and are not bundled into FTMod.
     add("localModRuntime", files("lib/GlitchCore-forge-1.20.1-0.0.1.1.jar"))
