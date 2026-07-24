@@ -1,11 +1,12 @@
-package com.y271727uy.farmerstales
+package com.y271727uy.farmerstales.all.blocks
 
 import com.tterrag.registrate.util.entry.BlockEntry
+import com.y271727uy.farmerstales.registrate.ModRegistrate
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.material.MapColor
 
-object ModBlocks {
+/** Small starter group; future crop, machine and decoration groups belong beside it. */
+object BasicBlocks {
     @JvmField
     val EXAMPLE_BLOCK: BlockEntry<Block> = ModRegistrate.REGISTRATE
         .block("example_block") { properties ->
@@ -21,4 +22,6 @@ object ModBlocks {
         }
         .defaultLang()
         .register()
+
+    fun init() = Unit
 }

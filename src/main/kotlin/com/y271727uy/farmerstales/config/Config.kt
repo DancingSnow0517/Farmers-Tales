@@ -1,5 +1,6 @@
-package com.y271727uy.farmerstales
+package com.y271727uy.farmerstales.config
 
+import com.y271727uy.farmerstales.FTMod
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
@@ -8,7 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.config.ModConfigEvent
 
-@Mod.EventBusSubscriber(modid = FTMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = FTMod.Companion.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 object Config {
     private val builder = ForgeConfigSpec.Builder()
 

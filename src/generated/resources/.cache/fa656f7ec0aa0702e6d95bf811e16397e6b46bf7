@@ -1,8 +1,9 @@
-// 1.20.1	2026-07-24T10:05:29.7662206	Registrate Provider for farmerstales [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.20.1	2026-07-24T11:20:10.0041289	Registrate Provider for farmerstales [Recipes, Advancements, Loot Tables, Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 2ba96ca962c492523ccd88f2315559fbdb40a233 assets/farmerstales/blockstates/example_block.json
 2c6115262ce26d4e304d0e0bf86646f20dd05e9d assets/farmerstales/lang/en_ud.json
 14eab4bd7f12cd95f68ad6433a48790f1cb741a0 assets/farmerstales/lang/en_us.json
 bd721385e8bb8bf981c7a5e7a4d54ecf81cbcfc4 assets/farmerstales/models/block/example_block.json
 b3dd763e50bc4c98b4b2c9fa110eb914391abd4b assets/farmerstales/models/item/example_block.json
 0f104d7b59ea2fc4f1999942055e76ee4976e29e assets/farmerstales/models/item/example_item.json
+a163c9ce1e63e428f3fa804b66e491b455f18540 assets/farmerstales/models/item/template_item_generated.json
 74bf1bafa850be6c180bcaed6d8119e7fd271b44 data/farmerstales/loot_tables/blocks/example_block.json

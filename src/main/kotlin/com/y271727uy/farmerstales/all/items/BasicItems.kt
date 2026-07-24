@@ -1,11 +1,13 @@
-package com.y271727uy.farmerstales
+package com.y271727uy.farmerstales.all.items
 
 import com.tterrag.registrate.util.entry.ItemEntry
-import net.minecraft.world.item.Item
-import net.minecraft.world.item.CreativeModeTabs
+import com.y271727uy.farmerstales.registrate.ModRegistrate
 import net.minecraft.world.food.FoodProperties
+import net.minecraft.world.item.CreativeModeTabs
+import net.minecraft.world.item.Item
 
-object ModItems {
+/** Small starter group; future food, fish and ingredient groups belong beside it. */
+object BasicItems {
     @JvmField
     val EXAMPLE_ITEM: ItemEntry<Item> = ModRegistrate.REGISTRATE
         .item("example_item") { properties ->
@@ -18,4 +20,6 @@ object ModItems {
         .defaultLang()
         .tab(CreativeModeTabs.INGREDIENTS)
         .register()
+
+    fun init() = Unit
 }

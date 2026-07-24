@@ -14,8 +14,6 @@ plugins {
 val modId = providers.gradleProperty("mod_id").get()
 val minecraftVersionValue = providers.gradleProperty("minecraft_version").get()
 val forgeVersionValue = providers.gradleProperty("forge_version").get()
-val kffJar = layout.projectDirectory.file("lib/kotlinforforge-4.12.0-all.jar")
-
 version = providers.gradleProperty("mod_version").get()
 group = providers.gradleProperty("mod_group_id").get()
 
@@ -25,7 +23,28 @@ base {
 
 repositories {
     mavenLocal()
-    flatDir { dirs("lib") }
+    mavenCentral()
+    maven {
+        name = "JaredsMaven"
+        url = uri("https://maven.blamejared.com/")
+    }
+    maven {
+        name = "ModMaven"
+        url = uri("https://modmaven.dev")
+    }
+    maven {
+        name = "KotlinForForge"
+        url = uri("https://thedarkcolour.github.io/KotlinForForge/")
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = uri("https://api.modrinth.com/maven")
+            }
+        }
+        filter { includeGroup("maven.modrinth") }
+    }
     exclusiveContent {
         forRepository {
             maven { url = uri("https://maven.tterrag.com/") }
@@ -42,6 +61,12 @@ kotlin {
     jvmToolchain(17)
 }
 
+// Optional local mods are attached only to game runs, not to data generation.
+val localModRuntime = configurations.create("localModRuntime") {
+    isCanBeConsumed = false
+    isCanBeResolved = false
+}
+
 extensions.configure<LegacyForgeExtension> {
     version = "$minecraftVersionValue-$forgeVersionValue"
 
@@ -53,15 +78,18 @@ extensions.configure<LegacyForgeExtension> {
     runs {
         register("client") {
             client()
+            additionalRuntimeClasspathConfiguration.extendsFrom(localModRuntime)
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("server") {
             server()
+            additionalRuntimeClasspathConfiguration.extendsFrom(localModRuntime)
             programArgument("--nogui")
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("gameTestServer") {
             type = "gameTestServer"
+            additionalRuntimeClasspathConfiguration.extendsFrom(localModRuntime)
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("data") {
@@ -91,28 +119,17 @@ sourceSets.named("main") {
     resources.srcDir("src/generated/resources")
 }
 
-val modLocalRuntime = configurations.maybeCreate("modLocalRuntime")
-val localRuntimeMods = fileTree("lib") {
-    include("*.jar")
-    exclude(kffJar.asFile.name)
-}
-configurations.named("runtimeClasspath") {
-    extendsFrom(modLocalRuntime)
-}
-configurations.named("additionalRuntimeClasspath") {
-    extendsFrom(modLocalRuntime)
-}
-
 dependencies {
-    // Registrate is used by registry declarations and its data generators.
     jarJar(modApi(libs.registrate.get())!!)
+    modImplementation("thedarkcolour:kotlinforforge:4.12.0")
 
-    // KFF is a required local mod dependency. The flatDir repository keeps this
-    // local-only and modImplementation keeps it outside the generated jar.
-    modImplementation("local:kotlinforforge:4.12.0-all")
-
-    // Every other jar in lib is available to runClient, never embedded in our jar.
-    add("modLocalRuntime", localRuntimeMods)
+    // Local development/runtime mods. Comment out an entry to disable it.
+    // These files are used by run configurations and are not bundled into FTMod.
+    add("localModRuntime", files("lib/GlitchCore-forge-1.20.1-0.0.1.1.jar"))
+    add("localModRuntime", files("lib/SereneSeasons-forge-1.20.1-9.1.0.3.jar"))
+    add("localModRuntime", files("lib/sereneseasonsfix-1.20.2-1.1.1.0.jar"))
+    add("localModRuntime", files("lib/Jade-1.20.1-Forge-11.13.3.jar"))
+    add("localModRuntime", files("lib/jei-1.20.1-forge-15.20.0.129.jar"))
 }
 
 val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {

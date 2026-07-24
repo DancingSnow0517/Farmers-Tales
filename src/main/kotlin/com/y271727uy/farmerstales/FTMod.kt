@@ -1,6 +1,10 @@
 package com.y271727uy.farmerstales
 
 import com.mojang.logging.LogUtils
+import com.y271727uy.farmerstales.all.ModBlocks
+import com.y271727uy.farmerstales.all.ModItems
+import com.y271727uy.farmerstales.config.Config
+import com.y271727uy.farmerstales.data.ModDataGen
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.ModLoadingContext
 import net.minecraftforge.fml.common.Mod
@@ -14,7 +18,9 @@ class FTMod {
     init {
         val modEventBus = FMLJavaModLoadingContext.get().modEventBus
 
-        ModContent.init()
+        ModItems.init()
+        ModBlocks.init()
+        ModDataGen.init()
         modEventBus.addListener(::commonSetup)
         MinecraftForge.EVENT_BUS.register(this)
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC)
