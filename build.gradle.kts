@@ -1,5 +1,6 @@
 import net.neoforged.moddevgradle.legacyforge.dsl.LegacyForgeExtension
 import net.neoforged.moddevgradle.legacyforge.dsl.MixinExtension
+import net.neoforged.moddevgradle.legacyforge.dsl.ObfuscationExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -23,6 +24,10 @@ base {
 }
 
 repositories {
+    // Long-lived development mods are resolved from lib before any remote repository.
+    flatDir {
+        dirs("lib")
+    }
     mavenLocal()
     mavenCentral()
     maven {
@@ -62,11 +67,45 @@ kotlin {
     jvmToolchain(17)
 }
 
-// Optional local mods are attached only to game runs, not to data generation.
-val localModRuntime = configurations.create("localModRuntime") {
+// Long-lived development dependencies. ModDevGradle remaps these before the
+// Forge run, while the regular jar tasks never package them.
+val libModFiles = listOf(
+    file("lib/GlitchCore-forge-1.20.1-0.0.1.1.jar"),
+    file("lib/SereneSeasons-forge-1.20.1-9.1.0.3.jar"),
+    file("lib/sereneseasonsfix-1.20.2-1.1.1.0.jar"),
+    file("lib/Jade-1.20.1-Forge-11.13.3.jar"),
+    file("lib/jei-1.20.1-forge-15.20.0.129.jar"),
+    file("lib/farmersdelight-1.20.1-1.2.9.jar"),
+    file("lib/list-3.0.7.jar")
+).filter(File::exists)
+// Temporary test mods. They are attached as raw files only to run configs;
+// dropping a JAR into mods requires no dependency or coordinate maintenance.
+val testModFiles = fileTree(layout.projectDirectory.dir("mods")) {
+    include("*.jar")
+}.files
+
+val libRuntime = configurations.maybeCreate("libRuntime")
+configurations.named("runtimeClasspath") {
+    extendsFrom(libRuntime)
+}
+
+val modLibRuntime = extensions
+    .getByType<ObfuscationExtension>()
+    .createRemappingConfiguration(libRuntime)
+
+val testModRuntime = configurations.maybeCreate("testModRuntime").apply {
     isCanBeConsumed = false
     isCanBeResolved = false
 }
+
+fun localModCoordinate(file: File): String {
+    val stem = file.nameWithoutExtension
+    val separator = stem.lastIndexOf('-')
+    require(separator > 0) { "Local mod JAR must contain a name-version separator: ${file.name}" }
+    return "local:${stem.substring(0, separator)}:${stem.substring(separator + 1)}"
+}
+
+val libModCoordinates = libModFiles.map(::localModCoordinate)
 
 extensions.configure<LegacyForgeExtension> {
     version = "$minecraftVersionValue-$forgeVersionValue"
@@ -79,18 +118,19 @@ extensions.configure<LegacyForgeExtension> {
     runs {
         register("client") {
             client()
-            additionalRuntimeClasspathConfiguration.extendsFrom(localModRuntime)
+            additionalRuntimeClasspathConfiguration.extendsFrom(testModRuntime)
+            systemProperty("mixin.env.remapRefMap", "true")
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("server") {
             server()
-            additionalRuntimeClasspathConfiguration.extendsFrom(localModRuntime)
+            additionalRuntimeClasspathConfiguration.extendsFrom(testModRuntime)
             programArgument("--nogui")
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("gameTestServer") {
             type = "gameTestServer"
-            additionalRuntimeClasspathConfiguration.extendsFrom(localModRuntime)
+            additionalRuntimeClasspathConfiguration.extendsFrom(testModRuntime)
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("data") {
@@ -117,7 +157,8 @@ extensions.configure<LegacyForgeExtension> {
 }
 
 extensions.configure<MixinExtension> {
-    add(sourceSets.main.get(), "farmerstales.mixin.json")
+    config("farmerstales.mixin.json")
+    add(sourceSets.main.get(), "farmerstales.refmap.json")
 }
 
 sourceSets.named("main") {
@@ -127,19 +168,16 @@ sourceSets.named("main") {
 dependencies {
     jarJar(modApi(libs.registrate.get())!!)
     modImplementation("thedarkcolour:kotlinforforge:4.12.0")
+    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
-    // Optional API jars are compile-time only; the actual mods are supplied by localModRuntime.
+    libModCoordinates.forEach { add(modLibRuntime.name, it) }
+    testModFiles.forEach { add(testModRuntime.name, files(it)) }
+
+    // Optional API jars are compile-time only; the actual mods stay development-only.
     add("compileOnly", files("lib/Jade-1.20.1-Forge-11.13.3.jar"))
     add("compileOnly", files("lib/jei-1.20.1-forge-15.20.0.129.jar"))
     add("compileOnly", files("lib/SereneSeasons-forge-1.20.1-9.1.0.3.jar"))
 
-    // Local development/runtime mods. Comment out an entry to disable it.
-    // These files are used by run configurations and are not bundled into FTMod.
-    add("localModRuntime", files("lib/GlitchCore-forge-1.20.1-0.0.1.1.jar"))
-    add("localModRuntime", files("lib/SereneSeasons-forge-1.20.1-9.1.0.3.jar"))
-    add("localModRuntime", files("lib/sereneseasonsfix-1.20.2-1.1.1.0.jar"))
-    add("localModRuntime", files("lib/Jade-1.20.1-Forge-11.13.3.jar"))
-    add("localModRuntime", files("lib/jei-1.20.1-forge-15.20.0.129.jar"))
 }
 
 val generateModMetadata = tasks.register<ProcessResources>("generateModMetadata") {

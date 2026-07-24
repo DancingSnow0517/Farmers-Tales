@@ -2,8 +2,9 @@ package com.y271727uy.farmerstales
 
 import com.mojang.logging.LogUtils
 import com.y271727uy.farmerstales.all.ModBlocks
+import com.y271727uy.farmerstales.all.ModBlockEntities
 import com.y271727uy.farmerstales.all.ModItems
-import com.y271727uy.farmerstales.compat.CompatManager
+import com.y271727uy.farmerstales.integration.IntegrationManager
 import com.y271727uy.farmerstales.config.Config
 import com.y271727uy.farmerstales.data.ModDataGen
 import net.minecraftforge.common.MinecraftForge
@@ -21,14 +22,16 @@ class FTMod {
 
         ModItems.init()
         ModBlocks.init()
+        ModBlockEntities.init()
         ModDataGen.init()
+        IntegrationManager.initCreativeTabs(modEventBus)
         modEventBus.addListener(::commonSetup)
         MinecraftForge.EVENT_BUS.register(this)
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC)
     }
 
     private fun commonSetup(event: FMLCommonSetupEvent) {
-        CompatManager.init()
+        IntegrationManager.init()
         LOGGER.info("Farmer's Tales common setup complete")
     }
 

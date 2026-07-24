@@ -1,5 +1,15 @@
 {
-  "block.farmerstales.example_block": "ʞɔoןᗺ ǝןdɯɐxƎ",
-  "item.farmerstales.example_item": "ɯǝʇI ǝןdɯɐxƎ",
-  "itemGroup.farmerstales": "sǝןɐ⟘ s,ɹǝɯɹɐℲ"
+  "block.farmerstales.tree_compost": "ʇsodɯoƆ ǝǝɹ⟘",
+  "block.farmerstales.tree_stump": "dɯnʇS ǝǝɹ⟘",
+  "config.jade.plugin_farmerstales.tree_stump_jade": "dɯnʇS ǝǝɹ⟘ :sǝןɐ⟘ s,ɹǝɯɹɐℲ",
+  "itemGroup.farmerstales": "sǝןɐ⟘ s,ɹǝɯɹɐℲ",
+  "tooltip.farmerstales.jade.tree_stump.branches": "ϛᄅ/%s :sǝɥɔuɐɹᗺ",
+  "tooltip.farmerstales.jade.tree_stump.fertility": "ϛᄅ/%s :ʎʇıןıʇɹǝℲ",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_active": "ǝןqɐʇdǝɔɔɐ sı ǝɔuɐuǝʇuıɐɯ ǝǝɹ⟘",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_bonus": "%s+ pǝǝds ɥʇʍoɹb 'ʇuǝןןǝɔxǝ sı ǝɔuɐuǝʇuıɐɯ ǝǝɹ⟘",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_paused": "pǝsnɐd sı ɥʇʍoɹb ؛ʍoן ooʇ sı ǝɔuɐuǝʇuıɐɯ ǝǝɹ⟘",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_score": "00Ɩ/%s :ǝɔuɐuǝʇuıɐW",
+  "tooltip.farmerstales.jade.tree_stump.title": "oɟuI dɯnʇS ǝǝɹ⟘",
+  "tooltip.farmerstales.jade.tree_stump.water": "0ϛ/%s :ɹǝʇɐM",
+  "tooltip.farmerstales.tree_seed.cultivable": "¡ʇsodɯoɔ ǝǝɹʇ ɐ uo pǝʇɐʌıʇןnɔ ǝq uɐƆ"
 }

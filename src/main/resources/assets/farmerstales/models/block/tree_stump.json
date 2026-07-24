@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "farmerstales:block/tree_compost/tree_stump_side",
+    "down": "farmerstales:block/tree_compost/tree_stump_top",
+    "up": "farmerstales:block/tree_compost/tree_stump_top",
+    "north": "farmerstales:block/tree_compost/tree_stump_side",
+    "east": "farmerstales:block/tree_compost/tree_stump_side",
+    "south": "farmerstales:block/tree_compost/tree_stump_side",
+    "west": "farmerstales:block/tree_compost/tree_stump_side"
+  }
+}

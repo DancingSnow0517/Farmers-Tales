@@ -1,0 +1,15 @@
+{
+  "block.farmerstales.tree_compost": "樹坑",
+  "block.farmerstales.tree_stump": "樹樁",
+  "config.jade.plugin_farmerstales.tree_stump_jade": "樹樁",
+  "itemGroup.farmerstales": "農夫物語",
+  "tooltip.farmerstales.jade.tree_stump.branches": "雜枝：%s/25",
+  "tooltip.farmerstales.jade.tree_stump.fertility": "肥力：%s/25",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_active": "樹木維護尚可",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_bonus": "樹木維護良好，成長速度 +%s",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_paused": "樹木維護不佳",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_score": "維護評分：%s/100",
+  "tooltip.farmerstales.jade.tree_stump.title": "樹樁資訊",
+  "tooltip.farmerstales.jade.tree_stump.water": "含水：%s/50",
+  "tooltip.farmerstales.tree_seed.cultivable": "可喺樹坑上進行培育！"
+}

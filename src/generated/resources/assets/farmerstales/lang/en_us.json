@@ -1,5 +1,15 @@
 {
-  "block.farmerstales.example_block": "Example Block",
-  "item.farmerstales.example_item": "Example Item",
-  "itemGroup.farmerstales": "Farmer's Tales"
+  "block.farmerstales.tree_compost": "Tree Compost",
+  "block.farmerstales.tree_stump": "Tree Stump",
+  "config.jade.plugin_farmerstales.tree_stump_jade": "Farmer's Tales: Tree Stump",
+  "itemGroup.farmerstales": "Farmer's Tales",
+  "tooltip.farmerstales.jade.tree_stump.branches": "Branches: %s/25",
+  "tooltip.farmerstales.jade.tree_stump.fertility": "Fertility: %s/25",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_active": "Tree maintenance is acceptable",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_bonus": "Tree maintenance is excellent, growth speed +%s",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_paused": "Tree maintenance is too low; growth is paused",
+  "tooltip.farmerstales.jade.tree_stump.maintenance_score": "Maintenance: %s/100",
+  "tooltip.farmerstales.jade.tree_stump.title": "Tree Stump Info",
+  "tooltip.farmerstales.jade.tree_stump.water": "Water: %s/50",
+  "tooltip.farmerstales.tree_seed.cultivable": "Can be cultivated on a tree compost!"
 }
