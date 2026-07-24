@@ -78,25 +78,28 @@ val libModFiles = listOf(
     file("lib/farmersdelight-1.20.1-1.2.9.jar"),
     file("lib/list-3.0.7.jar")
 ).filter(File::exists)
-// Temporary test mods. They are attached as raw files only to run configs;
-// dropping a JAR into mods requires no dependency or coordinate maintenance.
+// Temporary test mods. They are remapped for the named development runtime and
+// copied to run/mods before launch; dropping a JAR here requires no coordinates.
 val testModFiles = fileTree(layout.projectDirectory.dir("mods")) {
     include("*.jar")
-}.files
+}
+
+val testModInput = configurations.maybeCreate("testModInput").apply {
+    isCanBeConsumed = false
+}
+val testModRuntime = extensions
+    .getByType<ObfuscationExtension>()
+    .createRemappingConfiguration(testModInput)
 
 val libRuntime = configurations.maybeCreate("libRuntime")
 configurations.named("runtimeClasspath") {
     extendsFrom(libRuntime)
+    extendsFrom(testModInput)
 }
 
 val modLibRuntime = extensions
     .getByType<ObfuscationExtension>()
     .createRemappingConfiguration(libRuntime)
-
-val testModRuntime = configurations.maybeCreate("testModRuntime").apply {
-    isCanBeConsumed = false
-    isCanBeResolved = false
-}
 
 fun localModCoordinate(file: File): String {
     val stem = file.nameWithoutExtension
@@ -118,19 +121,16 @@ extensions.configure<LegacyForgeExtension> {
     runs {
         register("client") {
             client()
-            additionalRuntimeClasspathConfiguration.extendsFrom(testModRuntime)
             systemProperty("mixin.env.remapRefMap", "true")
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("server") {
             server()
-            additionalRuntimeClasspathConfiguration.extendsFrom(testModRuntime)
             programArgument("--nogui")
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("gameTestServer") {
             type = "gameTestServer"
-            additionalRuntimeClasspathConfiguration.extendsFrom(testModRuntime)
             systemProperty("forge.enabledGameTestNamespaces", modId)
         }
         register("data") {
@@ -171,7 +171,7 @@ dependencies {
     annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
     libModCoordinates.forEach { add(modLibRuntime.name, it) }
-    testModFiles.forEach { add(testModRuntime.name, files(it)) }
+    add(testModInput.name, files(testModFiles))
 
     // Optional API jars are compile-time only; the actual mods stay development-only.
     add("compileOnly", files("lib/Jade-1.20.1-Forge-11.13.3.jar"))
