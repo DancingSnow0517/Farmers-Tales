@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.y271727uy.farmerstales.gameplay.quality.util
+package com.y271727uy.farmerstales.gameplay.quality_crop.util
 
 /**
  * 旧的通用非标准收获表已拆分。

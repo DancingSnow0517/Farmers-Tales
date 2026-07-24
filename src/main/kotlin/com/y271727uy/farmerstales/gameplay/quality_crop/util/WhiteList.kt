@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.y271727uy.farmerstales.gameplay.quality.util
+package com.y271727uy.farmerstales.gameplay.quality_crop.util
 
 /**
  * 兼容旧名字的外壳，新的标准作物白名单请使用 `StandardCropWhitelist`。

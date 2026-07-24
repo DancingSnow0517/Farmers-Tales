@@ -28,6 +28,9 @@ repositories {
     flatDir {
         dirs("lib")
     }
+    flatDir {
+        dirs("mods")
+    }
     mavenLocal()
     mavenCentral()
     maven {
@@ -78,8 +81,8 @@ val libModFiles = listOf(
     file("lib/farmersdelight-1.20.1-1.2.9.jar"),
     file("lib/list-3.0.7.jar")
 ).filter(File::exists)
-// Temporary test mods. They are remapped for the named development runtime and
-// copied to run/mods before launch; dropping a JAR here requires no coordinates.
+// Temporary test mods. Their coordinates are derived from each file name and
+// resolved from this local directory, so adding a JAR requires no Gradle edits.
 val testModFiles = fileTree(layout.projectDirectory.dir("mods")) {
     include("*.jar")
 }
@@ -171,7 +174,9 @@ dependencies {
     annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
     libModCoordinates.forEach { add(modLibRuntime.name, it) }
-    add(testModInput.name, files(testModFiles))
+    testModFiles.files
+        .map(::localModCoordinate)
+        .forEach { add(testModRuntime.name, it) }
 
     // Optional API jars are compile-time only; the actual mods stay development-only.
     add("compileOnly", files("lib/Jade-1.20.1-Forge-11.13.3.jar"))

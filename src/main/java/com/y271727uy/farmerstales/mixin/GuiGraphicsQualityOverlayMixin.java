@@ -1,6 +1,6 @@
 package com.y271727uy.farmerstales.mixin;
 
-import com.y271727uy.farmerstales.gameplay.quality.client.QualityOverlayRenderer;
+import com.y271727uy.farmerstales.gameplay.quality_crop.client.QualityOverlayRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;

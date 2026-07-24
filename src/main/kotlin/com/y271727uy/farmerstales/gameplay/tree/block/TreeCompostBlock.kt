@@ -2,15 +2,19 @@ package com.y271727uy.farmerstales.gameplay.tree.block
 
 import com.y271727uy.farmerstales.gameplay.tree.block.entity.TreeCompostBlockEntity
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.BaseEntityBlock
 import net.minecraft.world.level.block.RenderShape
+import net.minecraft.world.level.block.SaplingBlock
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties as BlockProperties
 import net.minecraft.world.level.block.state.BlockState
 import com.y271727uy.farmerstales.all.ModBlockEntities
+import net.minecraftforge.common.IPlantable
 
 @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
 class TreeCompostBlock(properties: BlockProperties) : BaseEntityBlock(properties) {
@@ -22,6 +26,19 @@ class TreeCompostBlock(properties: BlockProperties) : BaseEntityBlock(properties
 		return if (level.isClientSide) null else createTickerHelper(type, ModBlockEntities.TREE_COMPOST.get()) { currentLevel, pos, currentState, blockEntity ->
 			TreeCompostBlockEntity.serverTick(currentLevel, pos, currentState, blockEntity as TreeCompostBlockEntity)
 		}
+	}
+
+	override fun canSustainPlant(
+		state: BlockState,
+		level: BlockGetter,
+		pos: BlockPos,
+		facing: Direction,
+		plantable: IPlantable
+	): Boolean {
+		if (facing == Direction.UP && plantable.getPlant(level, pos.above()).block is SaplingBlock) {
+			return true
+		}
+		return super.canSustainPlant(state, level, pos, facing, plantable)
 	}
 
 	@Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")

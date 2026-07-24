@@ -32,6 +32,9 @@ object SeasonVariables {
 		if (level == null) {
 			return false
 		}
+		if (!IntegrationManager.isSereneSeasonsLoaded()) {
+			return true
+		}
 		if (pos == null) {
 			val seasonId = currentSeasonId(level, null) ?: return false
 			return seasonId in TREE_GROWTH_SEASONS

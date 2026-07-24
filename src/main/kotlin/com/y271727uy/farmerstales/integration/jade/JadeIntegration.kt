@@ -1,6 +1,7 @@
 package com.y271727uy.farmerstales.integration.jade
 
 import com.y271727uy.farmerstales.FTMod
+import com.y271727uy.farmerstales.gameplay.season_breeding.AnimalBreedingTooltipProvider
 import com.y271727uy.farmerstales.gameplay.tree.block.TreeStumpBlock
 import snownee.jade.api.IWailaPlugin
 import snownee.jade.api.IWailaClientRegistration
@@ -16,5 +17,6 @@ object JadeIntegration {
 class FarmerTalesJadePlugin : IWailaPlugin {
     override fun registerClient(registration: IWailaClientRegistration) {
         registration.registerBlockComponent(TreeStumpTooltipProvider, TreeStumpBlock::class.java)
+        registration.registerEntityComponent(AnimalBreedingTooltipProvider, net.minecraft.world.entity.animal.Animal::class.java)
     }
 }

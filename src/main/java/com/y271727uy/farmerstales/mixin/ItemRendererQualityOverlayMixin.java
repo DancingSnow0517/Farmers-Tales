@@ -1,7 +1,7 @@
 package com.y271727uy.farmerstales.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.y271727uy.farmerstales.gameplay.quality.client.QualityOverlayRenderer;
+import com.y271727uy.farmerstales.gameplay.quality_crop.client.QualityOverlayRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;

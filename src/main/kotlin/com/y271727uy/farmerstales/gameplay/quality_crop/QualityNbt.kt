@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.y271727uy.farmerstales.gameplay.quality
+package com.y271727uy.farmerstales.gameplay.quality_crop
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.item.ItemStack

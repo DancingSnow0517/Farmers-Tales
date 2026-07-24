@@ -48,6 +48,10 @@ object IntegrationManager {
         return level?.let(::currentSeasonName)
     }
 
+    fun isSereneSeasonsLoaded(): Boolean {
+        return ModList.get().isLoaded(SERENE_SEASONS)
+    }
+
     private fun isLoaded(modId: String): Boolean {
         val loaded = ModList.get().isLoaded(modId)
         if (loaded) {

@@ -1,9 +1,9 @@
-package com.y271727uy.farmerstales.gameplay.quality.event.harvest
+package com.y271727uy.farmerstales.gameplay.quality_crop.event.harvest
 
 import com.y271727uy.farmerstales.FTMod
-import com.y271727uy.farmerstales.gameplay.quality.Quality
-import com.y271727uy.farmerstales.gameplay.quality.QualityNbt
-import com.y271727uy.farmerstales.gameplay.quality.util.MDWhiteList
+import com.y271727uy.farmerstales.gameplay.quality_crop.Quality
+import com.y271727uy.farmerstales.gameplay.quality_crop.QualityNbt
+import com.y271727uy.farmerstales.gameplay.quality_crop.util.MDWhiteList
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult

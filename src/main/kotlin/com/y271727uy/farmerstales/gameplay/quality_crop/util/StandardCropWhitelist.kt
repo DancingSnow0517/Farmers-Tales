@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.y271727uy.farmerstales.gameplay.quality.util
+package com.y271727uy.farmerstales.gameplay.quality_crop.util
 
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation

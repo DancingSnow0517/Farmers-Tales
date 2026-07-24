@@ -1,9 +1,6 @@
 package com.y271727uy.farmerstales.config
 
 import com.y271727uy.farmerstales.FTMod
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.item.Item
 import net.minecraftforge.common.ForgeConfigSpec
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
@@ -13,44 +10,44 @@ import net.minecraftforge.fml.event.config.ModConfigEvent
 object Config {
     private val builder = ForgeConfigSpec.Builder()
 
-    private val logDirtBlockValue = builder
-        .comment("Whether to log the dirt block on common setup")
-        .define("logDirtBlock", true)
+    private val restrictAnimalBreedingValue = builder
+        .comment("Whether animal breeding is blocked outside each animal's breeding season")
+        .define("restrictAnimalBreeding", true)
 
-    private val magicNumberValue = builder
-        .comment("A magic number")
-        .defineInRange("magicNumber", 42, 0, Int.MAX_VALUE)
+    private val sendActionBarFeedbackValue = builder
+        .comment("Whether players receive an action bar hint when seasonal breeding is blocked")
+        .define("sendActionBarFeedback", true)
 
-    private val magicNumberIntroductionValue = builder
-        .comment("What you want the introduction message to be for the magic number")
-        .define("magicNumberIntroduction", "The magic number is... ")
+    private val weatherAffectsCropGrowthValue = builder
+        .comment("Whether rain and snow affect crop growth")
+        .define("weatherAffectsCropGrowth", true)
 
-    private val itemStringsValue = builder
-        .comment("A list of items to log on common setup")
-        .defineListAllowEmpty("items", listOf("minecraft:iron_ingot")) { value ->
-            value is String && BuiltInRegistries.ITEM.containsKey(ResourceLocation(value))
-        }
+    private val rainGrowthBonusChanceValue = builder
+        .comment("Chance for rain-exposed crops to receive one extra random growth tick")
+        .defineInRange("rainGrowthBonusChance", 0.35, 0.0, 1.0)
 
     @JvmField
     val SPEC: ForgeConfigSpec = builder.build()
 
-    var logDirtBlock: Boolean = true
+    var restrictAnimalBreeding: Boolean = true
         private set
-    var magicNumber: Int = 42
+    var sendActionBarFeedback: Boolean = true
         private set
-    var magicNumberIntroduction: String = "The magic number is... "
+    var weatherAffectsCropGrowth: Boolean = true
         private set
-    var items: Set<Item> = emptySet()
+    var rainGrowthBonusChance: Double = 0.35
         private set
 
     @JvmStatic
     @SubscribeEvent
     fun onLoad(event: ModConfigEvent) {
-        logDirtBlock = logDirtBlockValue.get()
-        magicNumber = magicNumberValue.get()
-        magicNumberIntroduction = magicNumberIntroductionValue.get()
-        items = itemStringsValue.get()
-            .map { BuiltInRegistries.ITEM.get(ResourceLocation(it)) }
-            .toSet()
+        if (event.config.getSpec() !== SPEC) {
+            return
+        }
+
+        restrictAnimalBreeding = restrictAnimalBreedingValue.get()
+        sendActionBarFeedback = sendActionBarFeedbackValue.get()
+        weatherAffectsCropGrowth = weatherAffectsCropGrowthValue.get()
+        rainGrowthBonusChance = rainGrowthBonusChanceValue.get()
     }
 }

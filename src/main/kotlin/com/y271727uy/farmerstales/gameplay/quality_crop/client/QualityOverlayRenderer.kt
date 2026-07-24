@@ -1,7 +1,7 @@
-package com.y271727uy.farmerstales.gameplay.quality.client
+package com.y271727uy.farmerstales.gameplay.quality_crop.client
 
 import com.mojang.blaze3d.vertex.PoseStack
-import com.y271727uy.farmerstales.gameplay.quality.QualityNbt
+import com.y271727uy.farmerstales.gameplay.quality_crop.QualityNbt
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.renderer.LightTexture
 import net.minecraft.client.renderer.MultiBufferSource

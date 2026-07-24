@@ -1,4 +1,4 @@
-package com.y271727uy.farmerstales.gameplay.quality
+package com.y271727uy.farmerstales.gameplay.quality_crop
 
 import com.y271727uy.farmerstales.FTMod
 import net.minecraft.resources.ResourceLocation
