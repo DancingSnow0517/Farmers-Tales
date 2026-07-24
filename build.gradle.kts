@@ -1,4 +1,5 @@
 import net.neoforged.moddevgradle.legacyforge.dsl.LegacyForgeExtension
+import net.neoforged.moddevgradle.legacyforge.dsl.MixinExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -113,6 +114,10 @@ extensions.configure<LegacyForgeExtension> {
             sourceSet(sourceSets.main.get())
         }
     }
+}
+
+extensions.configure<MixinExtension> {
+    add(sourceSets.main.get(), "farmerstales.mixin.json")
 }
 
 sourceSets.named("main") {
