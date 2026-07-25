@@ -137,12 +137,15 @@ object FruitsDelightTreeManager {
 		return true
 	}
 
-	fun tickTree(level: ServerLevel, stumpPos: BlockPos, entity: TreeStumpBlockEntity, maintenanceScore: Int, maintenanceBonus: Int): Boolean {
+	fun tickTree(level: ServerLevel, stumpPos: BlockPos, entity: TreeStumpBlockEntity, maintenanceScore: Int, maintenanceBonus: Int, growthAttempts: Int): Boolean {
 		if (!SeasonVariables.isTreeGrowthAllowed(level, stumpPos)) {
 			return false
 		}
 
 		if (Math.floorMod(level.gameTime + stumpPos.asLong(), TREE_TICK_INTERVAL_TICKS.toLong()) != 0L) {
+			return false
+		}
+		if (growthAttempts <= 0) {
 			return false
 		}
 
@@ -153,47 +156,51 @@ object FruitsDelightTreeManager {
 		val floweringState = floweringLeafState(definition) ?: return false
 		val fruitState = fruitLeafState(definition) ?: return false
 		val leafPositions = treeShape.leaveRelativePos.map { relative -> stumpPos.offset(relative.x, relative.y + entity.dy, relative.z) }
-		val floweringPositions = mutableListOf<BlockPos>()
-		val basePositions = mutableListOf<BlockPos>()
 
-		for (targetPos in leafPositions) {
-			val targetState = level.getBlockState(targetPos)
-			when {
-				targetState == floweringState -> floweringPositions.add(targetPos)
-				targetState == fruitState -> Unit
-				targetState.block == leafBlock -> basePositions.add(targetPos)
-			}
-		}
-
-		val desiredFloweringCount = desiredFloweringCount(definition, leafPositions.size, maintenanceScore)
 		var changed = false
 
-		if (floweringPositions.size < desiredFloweringCount && basePositions.isNotEmpty()) {
-			if (level.random.nextFloat() < FLOWERING_PROGRESS_SCALE) {
-				val targetPos = basePositions[level.random.nextInt(basePositions.size)]
-				if (level.getBlockState(targetPos).block == leafBlock) {
-					level.setBlockAndUpdate(targetPos, floweringState)
-					changed = true
+		repeat(growthAttempts) {
+			val floweringPositions = mutableListOf<BlockPos>()
+			val basePositions = mutableListOf<BlockPos>()
+
+			for (targetPos in leafPositions) {
+				val targetState = level.getBlockState(targetPos)
+				when {
+					targetState == floweringState -> floweringPositions.add(targetPos)
+					targetState == fruitState -> Unit
+					targetState.block == leafBlock -> basePositions.add(targetPos)
 				}
 			}
-		} else if (floweringPositions.size > desiredFloweringCount && floweringPositions.isNotEmpty()) {
-			val targetPos = floweringPositions[level.random.nextInt(floweringPositions.size)]
-			if (level.getBlockState(targetPos) == floweringState) {
-				level.setBlockAndUpdate(targetPos, baseState)
-				changed = true
-			}
-		} else if (floweringPositions.isNotEmpty() && maintenanceScore >= FLOWERING_PAUSE_THRESHOLD) {
-			val chance = if (maintenanceScore < FLOWERING_BOOST_THRESHOLD) {
-				maintenanceScore
-			} else {
-				(maintenanceScore + maintenanceBonus).coerceAtMost(GROWTH_ROLL_MAX)
-			}
-			val scaledChance = (chance * FLOWERING_PROGRESS_SCALE).toInt().coerceAtLeast(1)
-			if (level.random.nextInt(GROWTH_ROLL_MAX) < scaledChance) {
+
+			val desiredFloweringCount = desiredFloweringCount(definition, leafPositions.size, maintenanceScore)
+
+			if (floweringPositions.size < desiredFloweringCount && basePositions.isNotEmpty()) {
+				if (level.random.nextFloat() < FLOWERING_PROGRESS_SCALE) {
+					val targetPos = basePositions[level.random.nextInt(basePositions.size)]
+					if (level.getBlockState(targetPos).block == leafBlock) {
+						level.setBlockAndUpdate(targetPos, floweringState)
+						changed = true
+					}
+				}
+			} else if (floweringPositions.size > desiredFloweringCount && floweringPositions.isNotEmpty()) {
 				val targetPos = floweringPositions[level.random.nextInt(floweringPositions.size)]
 				if (level.getBlockState(targetPos) == floweringState) {
-					level.setBlockAndUpdate(targetPos, fruitState)
+					level.setBlockAndUpdate(targetPos, baseState)
 					changed = true
+				}
+			} else if (floweringPositions.isNotEmpty() && maintenanceScore >= FLOWERING_PAUSE_THRESHOLD) {
+				val chance = if (maintenanceScore < FLOWERING_BOOST_THRESHOLD) {
+					maintenanceScore
+				} else {
+					(maintenanceScore + maintenanceBonus).coerceAtMost(GROWTH_ROLL_MAX)
+				}
+				val scaledChance = (chance * FLOWERING_PROGRESS_SCALE).toInt().coerceAtLeast(1)
+				if (level.random.nextInt(GROWTH_ROLL_MAX) < scaledChance) {
+					val targetPos = floweringPositions[level.random.nextInt(floweringPositions.size)]
+					if (level.getBlockState(targetPos) == floweringState) {
+						level.setBlockAndUpdate(targetPos, fruitState)
+						changed = true
+					}
 				}
 			}
 		}

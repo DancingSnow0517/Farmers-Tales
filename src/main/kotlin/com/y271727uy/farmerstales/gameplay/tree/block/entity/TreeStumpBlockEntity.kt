@@ -13,10 +13,13 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.alchemy.PotionUtils
+import net.minecraft.world.item.alchemy.Potions
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.state.properties.IntegerProperty
 
 class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: BlockState) : BlockEntity(type, pos, state) {
 	var treeType: String = ""
@@ -30,17 +33,22 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 	companion object {
 		private const val INITIAL_GROWTH_DELAY_MIN_TICKS = 20 * 10
 		private const val INITIAL_GROWTH_DELAY_MAX_TICKS = 20 * 30
-		private const val FERTILIZE_MAX = 25
-		private const val WATER_MAX = 50
+		private const val FERTILIZE_MAX = 50
+		private const val WATER_MAX = 25
 		private const val FERTILIZER_GAIN = 10
 		private const val WATER_GAIN = 5
 		private const val BRANCHES_MAX = 25
 		private const val BRANCHES_GAIN_CHANCE = 0.125f
+		private const val FRESH_TREE_FERTILIZE = 15
+		private const val FRESH_TREE_WATER = 15
 		private const val GROWTH_ROLL_MAX = 125
 		private const val MAINTENANCE_LOW_THRESHOLD = 50
 		private const val MAINTENANCE_MAX = 100
 		private const val MAINTENANCE_BONUS_THRESHOLD = 80
 		private const val MAINTENANCE_BONUS = 25
+		private const val GROWTH_ATTEMPTS_BASE = 2
+		private const val GROWTH_ATTEMPTS_WELL_MAINTAINED = 4
+		private const val GROWTH_ATTEMPTS_PERFECT = 6
 
 		@JvmStatic
 		fun serverTick(level: Level, pos: BlockPos, state: BlockState, entity: TreeStumpBlockEntity) {
@@ -83,11 +91,6 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 				return
 			}
 
-			if (FruitsDelightTreeManager.supports(entity.treeType)) {
-				FruitsDelightTreeManager.tickTree(level, pos, entity, entity.maintenanceScore(), entity.maintenanceBonus())
-				return
-			}
-
 			if (Math.floorMod(level.gameTime + pos.asLong(), TREE_TICK_INTERVAL_TICKS.toLong()) != 0L) {
 				return
 			}
@@ -95,8 +98,6 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 			var fertilize = entity.fertilize
 			var water = entity.water
 			var branches = entity.branches
-			val maintenanceScore = entity.maintenanceScore()
-			val maintenanceBonus = entity.maintenanceBonus()
 
 			TreeDefinitions.scanBelowForFertilizer(level, pos)?.let { (fertilizerPos, fertilizerId) ->
 				if (fertilize < FERTILIZE_MAX) {
@@ -112,20 +113,68 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 				water = (water + WATER_GAIN).coerceAtMost(WATER_MAX)
 			}
 
-			if (treeShape.leaveRelativePos.isNotEmpty()) {
-				val selected = treeShape.leaveRelativePos[level.random.nextInt(treeShape.leaveRelativePos.size)]
-				val targetPos = pos.offset(selected.x, selected.y + entity.dy, selected.z)
-				val targetState = level.getBlockState(targetPos)
-				if (targetState.block == leafBlock) {
-					if (floweringLeafState != null && fruitLeafState != null) {
-						if (targetState == floweringLeafState) {
+			entity.fertilize = fertilize
+			entity.water = water
+			entity.branches = branches
+
+			val maintenanceScore = entity.maintenanceScore()
+			val maintenanceBonus = entity.maintenanceBonus()
+			val growthAttempts = entity.growthAttemptCount()
+
+			if (FruitsDelightTreeManager.supports(entity.treeType)) {
+				FruitsDelightTreeManager.tickTree(level, pos, entity, maintenanceScore, maintenanceBonus, growthAttempts)
+				entity.syncToClient()
+				return
+			}
+
+			if (growthAttempts > 0 && treeShape.leaveRelativePos.isNotEmpty()) {
+				repeat(growthAttempts) {
+					val eligibleLeaves = treeShape.leaveRelativePos.mapNotNull { relative ->
+						val targetPos = pos.offset(relative.x, relative.y + entity.dy, relative.z)
+						val targetState = level.getBlockState(targetPos)
+						if (isGenericGrowthCandidate(targetState, leafBlock, extraLeafState, treeDefinition)) targetPos else null
+					}
+					if (eligibleLeaves.isEmpty()) {
+						return@repeat
+					}
+
+					val targetPos = eligibleLeaves[level.random.nextInt(eligibleLeaves.size)]
+					val targetState = level.getBlockState(targetPos)
+					if (targetState.block == leafBlock) {
+						if (floweringLeafState != null && fruitLeafState != null) {
+							if (targetState == floweringLeafState) {
+								val chance = if (maintenanceScore < MAINTENANCE_LOW_THRESHOLD) {
+									0
+								} else {
+									(maintenanceScore + maintenanceBonus).coerceAtMost(GROWTH_ROLL_MAX)
+								}
+								if (level.random.nextInt(GROWTH_ROLL_MAX) < chance) {
+									level.setBlockAndUpdate(targetPos, fruitLeafState)
+									if (level.random.nextFloat() < 0.4f) {
+										fertilize = (fertilize - 1).coerceAtLeast(0)
+									}
+									if (level.random.nextFloat() < 0.4f) {
+										water = (water - 1).coerceAtLeast(0)
+									}
+									if (level.random.nextFloat() < BRANCHES_GAIN_CHANCE) {
+										branches = (branches + 1).coerceAtMost(BRANCHES_MAX)
+									}
+								}
+							}
+						} else if (!(extraLeafState != null && targetState == extraLeafState)) {
+							val currentState = targetState.values.entries.firstOrNull { it.key.name == "blockstate" }?.value as? Int
 							val chance = if (maintenanceScore < MAINTENANCE_LOW_THRESHOLD) {
 								0
 							} else {
 								(maintenanceScore + maintenanceBonus).coerceAtMost(GROWTH_ROLL_MAX)
 							}
 							if (level.random.nextInt(GROWTH_ROLL_MAX) < chance) {
-								level.setBlockAndUpdate(targetPos, fruitLeafState)
+								val nextState = if (currentState == baseLeafState) {
+									TreeDefinitions.setLeafState(targetState, treeDefinition.growingState)
+								} else {
+									TreeDefinitions.promoteLeafState(targetState, treeDefinition)
+								}
+								level.setBlockAndUpdate(targetPos, nextState)
 								if (level.random.nextFloat() < 0.4f) {
 									fertilize = (fertilize - 1).coerceAtLeast(0)
 								}
@@ -135,33 +184,9 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 								if (level.random.nextFloat() < BRANCHES_GAIN_CHANCE) {
 									branches = (branches + 1).coerceAtMost(BRANCHES_MAX)
 								}
+							} else if (currentState != treeDefinition.ripeState) {
+								level.setBlockAndUpdate(targetPos, TreeDefinitions.setLeafState(targetState, baseLeafState))
 							}
-						}
-					} else if (!(extraLeafState != null && targetState == extraLeafState)) {
-						val currentState = targetState.values.entries.firstOrNull { it.key.name == "blockstate" }?.value as? Int
-						val chance = if (maintenanceScore < MAINTENANCE_LOW_THRESHOLD) {
-							0
-						} else {
-							(maintenanceScore + maintenanceBonus).coerceAtMost(GROWTH_ROLL_MAX)
-						}
-						if (level.random.nextInt(GROWTH_ROLL_MAX) < chance) {
-							val nextState = if (currentState == baseLeafState) {
-								TreeDefinitions.setLeafState(targetState, treeDefinition.growingState)
-							} else {
-								TreeDefinitions.promoteLeafState(targetState, treeDefinition)
-							}
-							level.setBlockAndUpdate(targetPos, nextState)
-							if (level.random.nextFloat() < 0.4f) {
-								fertilize = (fertilize - 1).coerceAtLeast(0)
-							}
-							if (level.random.nextFloat() < 0.4f) {
-								water = (water - 1).coerceAtLeast(0)
-							}
-							if (level.random.nextFloat() < BRANCHES_GAIN_CHANCE) {
-								branches = (branches + 1).coerceAtMost(BRANCHES_MAX)
-							}
-						} else if (currentState != treeDefinition.ripeState) {
-							level.setBlockAndUpdate(targetPos, TreeDefinitions.setLeafState(targetState, baseLeafState))
 						}
 					}
 				}
@@ -171,6 +196,18 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 			entity.water = water
 			entity.branches = branches
 			entity.syncToClient()
+		}
+
+		private fun isGenericGrowthCandidate(targetState: BlockState, leafBlock: net.minecraft.world.level.block.Block, extraLeafState: BlockState?, definition: com.y271727uy.farmerstales.gameplay.tree.TreeDefinition): Boolean {
+			if (targetState.block != leafBlock) {
+				return false
+			}
+			if (extraLeafState != null && targetState == extraLeafState) {
+				return false
+			}
+			val currentState = targetState.values.entries.firstOrNull { it.key is IntegerProperty && it.key.name == "blockstate" }?.value as? Int
+				?: return false
+			return currentState < definition.ripeState
 		}
 
 		@JvmStatic
@@ -221,6 +258,12 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 		syncToClient()
 	}
 
+	fun primeFreshGrowth() {
+		fertilize = FRESH_TREE_FERTILIZE.coerceAtMost(FERTILIZE_MAX)
+		water = FRESH_TREE_WATER.coerceAtMost(WATER_MAX)
+		syncToClient()
+	}
+
 	fun maintenanceBonus(): Int {
 		return growthSpeedBonus()
 	}
@@ -230,16 +273,31 @@ class TreeStumpBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Block
 		return if (score >= MAINTENANCE_BONUS_THRESHOLD) MAINTENANCE_BONUS else 0
 	}
 
+	fun growthAttemptCount(): Int {
+		val score = maintenanceScore()
+		return when {
+			score < MAINTENANCE_LOW_THRESHOLD -> 0
+			score >= MAINTENANCE_MAX -> GROWTH_ATTEMPTS_PERFECT
+			score >= MAINTENANCE_BONUS_THRESHOLD -> GROWTH_ATTEMPTS_WELL_MAINTAINED
+			else -> GROWTH_ATTEMPTS_BASE
+		}
+	}
+
 	fun applyPotionWatering(player: Player, stack: ItemStack): Boolean {
-		if (stack.item != Items.POTION) {
+		if (stack.item != Items.POTION || PotionUtils.getPotion(stack) != Potions.WATER) {
 			return false
 		}
 		if (!validateAndNormalize()) {
 			return false
 		}
+		if (water >= WATER_MAX) {
+			return false
+		}
 
 		water = (water + WATER_GAIN).coerceAtMost(WATER_MAX)
-		fertilize = (fertilize - 1).coerceAtLeast(0)
+		if (player.level().random.nextFloat() < 0.5f) {
+			fertilize = (fertilize - 1).coerceAtLeast(0)
+		}
 
 		if (!player.abilities.instabuild) {
 			stack.shrink(1)

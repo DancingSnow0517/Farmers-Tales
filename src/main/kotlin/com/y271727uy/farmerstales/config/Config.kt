@@ -14,6 +14,10 @@ object Config {
         .comment("Whether animal breeding is blocked outside each animal's breeding season")
         .define("restrictAnimalBreeding", true)
 
+    private val restrictFishingLootValue = builder
+        .comment("Whether seasonal fishing weights apply to fishing catches")
+        .define("restrictFishingLoot", true)
+
     private val sendActionBarFeedbackValue = builder
         .comment("Whether players receive an action bar hint when seasonal breeding is blocked")
         .define("sendActionBarFeedback", true)
@@ -31,6 +35,8 @@ object Config {
 
     var restrictAnimalBreeding: Boolean = true
         private set
+    var restrictFishingLoot: Boolean = true
+        private set
     var sendActionBarFeedback: Boolean = true
         private set
     var weatherAffectsCropGrowth: Boolean = true
@@ -46,6 +52,7 @@ object Config {
         }
 
         restrictAnimalBreeding = restrictAnimalBreedingValue.get()
+        restrictFishingLoot = restrictFishingLootValue.get()
         sendActionBarFeedback = sendActionBarFeedbackValue.get()
         weatherAffectsCropGrowth = weatherAffectsCropGrowthValue.get()
         rainGrowthBonusChance = rainGrowthBonusChanceValue.get()

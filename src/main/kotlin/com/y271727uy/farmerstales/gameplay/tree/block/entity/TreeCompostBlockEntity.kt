@@ -1,7 +1,6 @@
 package com.y271727uy.farmerstales.gameplay.tree.block.entity
 
 import com.y271727uy.farmerstales.all.ModBlocks
-import com.y271727uy.farmerstales.gameplay.tree.FruitsDelightTreeManager
 import com.y271727uy.farmerstales.gameplay.tree.TreeDefinitions
 import com.y271727uy.farmerstales.gameplay.tree.event.EnvironmentVariables.SeasonVariables
 import net.minecraft.core.BlockPos
@@ -65,7 +64,7 @@ class TreeCompostBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Blo
 
 			level.removeBlock(abovePos, false)
 			if (TreeDefinitions.createTree(level, abovePos, entity.treeType, entity.dy)) {
-				primeFreshTree(level, abovePos, entity.treeType)
+				primeFreshTree(level, abovePos)
 				entity.pendingGrowthTicks = -1
 				entity.syncToClient()
 			}
@@ -89,22 +88,16 @@ class TreeCompostBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: Blo
 			level.removeBlock(pos.above(), false)
 			val grew = TreeDefinitions.createTree(level, pos.above(), entity.treeType, entity.dy)
 			if (grew) {
-				primeFreshTree(level, pos.above(), entity.treeType)
+				primeFreshTree(level, pos.above())
 				entity.pendingGrowthTicks = -1
 				entity.syncToClient()
 			}
 			return grew
 		}
 
-		private fun primeFreshTree(level: ServerLevel, stumpPos: BlockPos, treeType: String) {
-			if (!FruitsDelightTreeManager.supports(treeType)) {
-				return
-			}
-
+		private fun primeFreshTree(level: ServerLevel, stumpPos: BlockPos) {
 			val blockEntity = level.getBlockEntity(stumpPos) as? TreeStumpBlockEntity ?: return
-			blockEntity.fertilize = 15
-			blockEntity.water = 15
-			blockEntity.syncToClient()
+			blockEntity.primeFreshGrowth()
 		}
 	}
 

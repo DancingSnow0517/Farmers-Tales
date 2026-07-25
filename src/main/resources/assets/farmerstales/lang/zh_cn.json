@@ -30,12 +30,12 @@
   "tooltip.farmerstales.fishing_time": "时间：%s",
   "tooltip.farmerstales.fishing_weather": "天气：%s",
   "tooltip.farmerstales.jade.tree_stump.branches": "杂枝：%s/25",
-  "tooltip.farmerstales.jade.tree_stump.fertility": "肥力：%s/25",
+  "tooltip.farmerstales.jade.tree_stump.fertility": "肥力：%s/50",
   "tooltip.farmerstales.jade.tree_stump.maintenance_active": "树木维护尚可",
   "tooltip.farmerstales.jade.tree_stump.maintenance_bonus": "树木维护良好，成长速度 +%s",
   "tooltip.farmerstales.jade.tree_stump.maintenance_paused": "树木维护不佳",
   "tooltip.farmerstales.jade.tree_stump.maintenance_score": "维护评分：%s/100",
   "tooltip.farmerstales.jade.tree_stump.title": "树桩信息",
-  "tooltip.farmerstales.jade.tree_stump.water": "含水：%s/50",
+  "tooltip.farmerstales.jade.tree_stump.water": "含水：%s/25",
   "tooltip.farmerstales.tree_seed.cultivable": "可在树坑上进行培育!"
 }
